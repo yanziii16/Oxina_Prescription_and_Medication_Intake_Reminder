@@ -1,0 +1,103 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+export default function AddMedication() {
+  const [form, setForm] = useState({
+    name: '',
+    dosage: '',
+    time: '08:00',
+    refillCount: ''
+  });
+
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      await axios.post('http://localhost:5000/api/medications', {
+        name: form.name,
+        dosage: form.dosage,
+        timeOfDay: form.time,
+        refillCount: Number(form.refillCount)
+      });
+
+      alert('Prescription saved successfully!');
+      navigate('/');
+    } catch (error) {
+      console.error('Error saving medication:', error);
+      
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to save prescription.';
+      alert(`Save Failed: ${errorMessage}`);
+    }
+  };
+
+  return (
+    <div className="page">
+      <div className="form-page">
+        <div className="form-container">
+          <div className="form-header">
+            <div className="form-header-icon">💊</div>
+            <h2>Add New Medication</h2>
+            <p>Set your medication schedule and reminder.</p>
+          </div>
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Medication Name</label>
+              <input
+                type="text"
+                placeholder="e.g. Biogesic"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Dosage</label>
+              <input
+                type="text"
+                placeholder="e.g. 500mg"
+                value={form.dosage}
+                onChange={(e) => setForm({ ...form, dosage: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Medication Time</label>
+              <input
+                type="time"
+                value={form.time}
+                onChange={(e) => setForm({ ...form, time: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Refill Count</label>
+              <input
+                type="number"
+                min="0"
+                placeholder="e.g. 5"
+                value={form.refillCount}
+                onChange={(e) => setForm({ ...form, refillCount: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="reminder-info">
+              🔔 You will receive a browser notification when it is time to take this medication.
+            </div>
+
+            <button type="submit" className="save-button">
+              💾 Save Prescription
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
