@@ -8,6 +8,7 @@ export default function Home() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [notificationEnabled, setNotificationEnabled] = useState(
     typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted'
   );
@@ -101,16 +102,11 @@ export default function Home() {
   const deleteMedication = async (id) => {
     if (!id) return;
 
-    const confirmDelete = window.confirm(
-      'Are you sure you want to remove this medication?'
-    );
-
-    if (!confirmDelete) return;
-
     try {
       await axios.delete(`http://localhost:5000/api/medications/${id}`);
 
       setMeds((prevMeds) => prevMeds.filter((med) => getMedId(med) !== id));
+      setDeleteConfirmId(null);
     } catch (error) {
       console.error('Error deleting medication:', error.response?.data || error.message);
     }
@@ -488,7 +484,7 @@ export default function Home() {
                     className="delete-button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      deleteMedication(medId);
+                      setDeleteConfirmId(medId);
                     }}
                   >
                     🗑
@@ -497,6 +493,31 @@ export default function Home() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Custom Delete Confirmation Modal */}
+      {deleteConfirmId && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+          <div style={{ background: '#fff', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '400px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', textAlign: 'center' }}>
+            <div style={{ fontSize: '32px', marginBottom: '10px' }}>⚠️</div>
+            <h3 style={{ margin: '0 0 10px 0', color: '#1f2937' }}>Delete Medication</h3>
+            <p style={{ color: '#4b5563', fontSize: '14px', marginBottom: '20px' }}>Are you sure you want to remove this medication from your schedule?</p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                style={{ background: '#e5e7eb', color: '#374151', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: '600', cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteMedication(deleteConfirmId)}
+                style={{ background: '#dc2626', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: '600', cursor: 'pointer' }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
