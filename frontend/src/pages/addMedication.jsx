@@ -9,6 +9,8 @@ export default function AddMedication() {
     time: '08:00',
     refillCount: ''
   });
+  
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const navigate = useNavigate();
 
@@ -23,14 +25,18 @@ export default function AddMedication() {
         refillCount: Number(form.refillCount)
       });
 
-      alert('Prescription saved successfully!');
-      navigate('/');
+      setShowSuccessModal(true);
     } catch (error) {
       console.error('Error saving medication:', error);
       
       const errorMessage = error.response?.data?.message || error.message || 'Failed to save prescription.';
       alert(`Save Failed: ${errorMessage}`);
     }
+  };
+
+  const handleModalClose = () => {
+    setShowSuccessModal(false);
+    navigate('/');
   };
 
   return (
@@ -98,6 +104,60 @@ export default function AddMedication() {
           </form>
         </div>
       </div>
+
+      {/* 4. CUSTOM SUCCESS MODAL UI */}
+      {showSuccessModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+          fontFamily: 'system-ui, -apple-system, sans-serif'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            padding: '28px',
+            borderRadius: '16px',
+            boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+            textAlign: 'center',
+            maxWidth: '380px',
+            width: '90%'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '12px' }}>✅</div>
+            <h3 style={{ margin: '0 0 8px 0', color: '#111827', fontSize: '22px' }}>
+              Success!
+            </h3>
+            <p style={{ color: '#4b5563', fontSize: '15px', marginBottom: '24px' }}>
+              Prescription saved successfully!
+            </p>
+            <button
+              onClick={handleModalClose}
+              style={{
+                backgroundColor: '#0284c7',
+                color: '#ffffff',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                fontWeight: '600',
+                fontSize: '15px',
+                cursor: 'pointer',
+                width: '100%',
+                transition: 'background-color 0.2s'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#0369a1'}
+              onMouseOut={(e) => e.target.style.backgroundColor = '#0284c7'}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
